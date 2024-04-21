@@ -86,7 +86,7 @@ class TaoshiApiClient(object):
     @staticmethod
     def _get_response_data(
         response: requests.Response,
-    ) -> typing.Union[dict, list[dict]]:
+    ) -> typing.Union[dict, typing.List[dict]]:
         return simplejson.loads(response.content)
 
     def _get_payload_with_credentials(self, payload: typing.Optional[dict]) -> dict:
