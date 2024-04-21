@@ -59,7 +59,7 @@ def import_taoshi_positions(miner: src_enums.TaoshiMiner) -> None:
     )
 
 
-def _get_taoshi_positions(miner: src_enums.TaoshiMiner) -> typing.Optional[list[dict]]:
+def _get_taoshi_positions(miner: src_enums.TaoshiMiner) -> typing.Optional[typing.List[dict]]:
     try:
         return taoshi_api_client.TaoshiApiClient().get_positions()[
             src_constants.TAOSHI_MINER_CONFIG[miner.name]["public_key"]
