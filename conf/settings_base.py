@@ -190,3 +190,7 @@ DYDX_CREDENTIALS = {
         "account_id": "",
     },
 }
+
+
+TAOSHI_API_BASE_URL = 'https://sn8.wildsage.io'
+TAOSHI_API_KEY = '<TAG>'

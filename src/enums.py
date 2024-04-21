@@ -63,3 +63,8 @@ class TradeDirection(enum.Enum):
             (TradeSide.BUY, PositionSide.LONG): TradeDirection.OPEN_LONG,
             (TradeSide.BUY, PositionSide.SHORT): TradeDirection.OPEN_SHORT,
         }.get((order_side, position_side))
+
+
+class TaoshiMiner(enum.Enum):
+    TARVIS = 1
+    TIMELESS = 2

@@ -61,7 +61,7 @@ class DYDXApiClient(object):
             pages=pages,
         )
 
-    def get_orders(self, limit: int = 100, pages: int = 1) -> typing.List[typing.Dict]:
+    def get_orders(self, limit: int = 100, pages: int = 2) -> typing.List[typing.Dict]:
         return self._get_paginated_response(
             endpoint="/v3/orders",
             method=common_enums.HttpMethod.GET,
@@ -88,7 +88,7 @@ class DYDXApiClient(object):
     def get_funding_payments(
         self,
         limit: int = 100,
-        pages: int = 1,
+        pages: int = 10,
         to_datetime: typing.Optional[datetime.datetime] = None,
     ) -> typing.List[typing.Dict]:
         params = {}

@@ -21,7 +21,7 @@ class HyperLiquidApiClient(object):
     LOG_PREFIX = "[HYPER-LIQUID-API-CLIENT]"
 
     def get_open_orders(
-        self, wallet_address: str, limit: int = 100, pages: int = 1
+        self, wallet_address: str, limit: int = 100, pages: int = 2
     ) -> typing.List[typing.Dict]:
         return self._get_paginated_data(
             endpoint="/info",
