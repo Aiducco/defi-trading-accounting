@@ -23,29 +23,13 @@ class Command(BaseCommand):
             "{} Started command '{}'.".format(self.log_prefix, __name__.split(".")[-1])
         )
 
-        for miner in enums.TaoshiMiner:
-            logger.info(
-                "{} Importing signals data (miner={}).".format(
-                    self.log_prefix, miner.name
-                )
-            )
-
-            try:
-                taoshi_services.import_taoshi_positions(
-                    miner=miner,
-                )
-            except Exception as e:
-                logger.exception(
-                    "{} Unexpected exception occurred while importing signals data (miner={}). Error: {}.".format(
-                        self.log_prefix,
-                        miner.name,
-                        common_utils.get_exception_message(exception=e),
-                    )
-                )
-
-            logger.info(
-                "{} Finished importing signals data (miner={}).".format(
-                    self.log_prefix, miner.name
+        try:
+            taoshi_services.import_taoshi_positions()
+        except Exception as e:
+            logger.exception(
+                "{} Unexpected exception occurred while importing signals data. Error: {}.".format(
+                    self.log_prefix,
+                    common_utils.get_exception_message(exception=e),
                 )
             )
 

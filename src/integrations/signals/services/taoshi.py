@@ -15,61 +15,53 @@ logger = logging.getLogger(__name__)
 _LOG_PREFIX = "[TAOSHI-SERVICES]"
 
 
-def import_taoshi_positions(miner: src_enums.TaoshiMiner) -> None:
+def import_taoshi_positions() -> None:
     logger.info(
-        "{} Started importing taoshi position data (miner={}, public_key={}).".format(
-            _LOG_PREFIX,
-            miner.name,
-            src_constants.TAOSHI_MINER_CONFIG[miner.name]["public_key"],
+        "{} Started importing taoshi position data.".format(
+            _LOG_PREFIX
         )
     )
-    positions = _get_taoshi_positions(miner=miner)
+    positions = _get_taoshi_positions()
     if not positions:
         return
 
     logger.info(
-        "{} Found total {} positions to check for importing (miner={}).".format(
-            _LOG_PREFIX, len(positions), miner.name
+        "{} Found total {} miners positions to check for importing.".format(
+            _LOG_PREFIX, len(positions)
         )
     )
 
-    for position in positions:
-        try:
-            if not _is_position_valid(position=position):
+    for miner_positions in positions:
+        for position in positions[miner_positions]['positions']:
+            try:
+                if not _is_position_valid(position=position):
+                    continue
+
+                _import_taoshi_position(position=position)
+            except Exception as e:
+                logger.exception(
+                    "{} Unable to import taoshi position (position_id={}). Error: {}. Continue.".format(
+                        _LOG_PREFIX,
+                        position["position_uuid"],
+                        common_utils.get_exception_message(exception=e),
+                    )
+                )
                 continue
 
-            _import_taoshi_position(position=position, miner=miner)
-        except Exception as e:
-            logger.exception(
-                "{} Unable to import taoshi position (miner={}, position_id={}). Error: {}. Continue.".format(
-                    _LOG_PREFIX,
-                    miner.name,
-                    position["position_uuid"],
-                    common_utils.get_exception_message(exception=e),
-                )
-            )
-            continue
-
     logger.info(
-        "{} Finished importing taoshi position data (miner={}, public_key={}).".format(
+        "{} Finished importing taoshi position data.".format(
             _LOG_PREFIX,
-            miner.name,
-            src_constants.TAOSHI_MINER_CONFIG[miner.name]["public_key"],
         )
     )
 
 
-def _get_taoshi_positions(miner: src_enums.TaoshiMiner) -> typing.Optional[typing.List[dict]]:
+def _get_taoshi_positions() -> typing.Optional[dict]:
     try:
-        return taoshi_api_client.TaoshiApiClient().get_positions()[
-            src_constants.TAOSHI_MINER_CONFIG[miner.name]["public_key"]
-        ]["positions"]
+        return taoshi_api_client.TaoshiApiClient().get_positions()
     except Exception as e:
         logger.exception(
-            "{} Unable to get taoshi positions (miner={}, public_key={}). Error: {}.".format(
+            "{} Unable to get taoshi positions. Error: {}.".format(
                 _LOG_PREFIX,
-                miner.name,
-                src_constants.TAOSHI_MINER_CONFIG[miner.name]["public_key"],
                 common_utils.get_exception_message(exception=e),
             )
         )
@@ -87,10 +79,10 @@ def _is_position_valid(position: dict) -> bool:
     return False
 
 
-def _import_taoshi_position(miner: src_enums.TaoshiMiner, position: dict) -> None:
+def _import_taoshi_position(position: dict) -> None:
     logger.info(
-        "{} Importing position (miner={}, position_id={}).".format(
-            _LOG_PREFIX, miner.name, position["position_uuid"]
+        "{} Importing position (position_id={}).".format(
+            _LOG_PREFIX, position["position_uuid"]
         )
     )
     base_currency, counter_currency = position["trade_pair"][1].split("/")
@@ -106,8 +98,6 @@ def _import_taoshi_position(miner: src_enums.TaoshiMiner, position: dict) -> Non
             "initial_entry_price": position["initial_entry_price"],
             "is_closed": position["is_closed_position"],
             "net_leverage": position["net_leverage"],
-            "miner": miner.value,
-            "miner_name": miner.name,
             "miner_public_key": position['miner_hotkey'],
             "position_type": position["position_type"],
             "return_at_close": position["return_at_close"],
@@ -136,7 +126,7 @@ def _import_taoshi_position(miner: src_enums.TaoshiMiner, position: dict) -> Non
             )
 
     logger.info(
-        "{} Imported position (id={}, miner={}, position_id={}).".format(
-            _LOG_PREFIX, taoshi_position.id, miner.name, position["position_uuid"]
+        "{} Imported position (id={},position_id={}).".format(
+            _LOG_PREFIX, taoshi_position.id, position["position_uuid"]
         )
     )
