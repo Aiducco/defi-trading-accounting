@@ -164,6 +164,7 @@ class TaoshiPositionOrder(django_db_models.Model):
     processed_time = django_db_models.DateTimeField(null=True)
     order_type = django_db_models.CharField(max_length=255, null=False)
     price = django_db_models.FloatField(null=False)
+    market_price = django_db_models.FloatField(null=False)
 
     position = django_db_models.ForeignKey(
         TaoshiPosition, on_delete=django_db_models.PROTECT

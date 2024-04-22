@@ -194,3 +194,5 @@ DYDX_CREDENTIALS = {
 
 TAOSHI_API_BASE_URL = 'https://sn8.wildsage.io'
 TAOSHI_API_KEY = '<TAG>'
+CRYPTO_QUANT_API_BASE_URL = "https://api.cryptoquant.com/v1/"
+CRYPTO_QUANT_API_KEY = "<TAG>"

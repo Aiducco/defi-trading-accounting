@@ -1,3 +1,4 @@
+import datetime
 import logging
 import typing
 
@@ -5,9 +6,9 @@ from django.db import transaction
 from django.utils import timezone
 
 from common import utils as common_utils
-from src import enums as src_enums
 from src import constants as src_constants
 from src import models as src_models
+from src.integrations.pricing.cryptoquant import client as cryptoquant_client
 from src.integrations.signals.taoshi import client as taoshi_api_client
 
 logger = logging.getLogger(__name__)
@@ -118,6 +119,11 @@ def _import_taoshi_position(position: dict) -> None:
                 ),
                 "order_type": order_info["order_type"],
                 "price": order_info["price"],
+                'market_price': _get_market_price(currency=base_currency.lower(), from_datetime=timezone.datetime.fromtimestamp(
+                    order_info["processed_ms"] / 1000
+                ), to_datetime=timezone.datetime.fromtimestamp(
+                    order_info["processed_ms"] / 1000
+                )),
                 "position": taoshi_position,
             }
 
@@ -130,3 +136,17 @@ def _import_taoshi_position(position: dict) -> None:
             _LOG_PREFIX, taoshi_position.id, position["position_uuid"]
         )
     )
+
+
+def _get_market_price(currency: str, from_datetime: datetime.datetime, to_datetime: datetime.datetime) -> float:
+    try:
+        return cryptoquant_client.CryptoQuantApiClient().get_price(currency=currency, from_datetime=from_datetime, to_datetime=to_datetime)
+    except Exception as e:
+        logger.exception(
+            "{} Unable to get market price (currency={}) positions. Error: {}.".format(
+                _LOG_PREFIX,
+                currency,
+                common_utils.get_exception_message(exception=e),
+            )
+        )
+        return 0.0
