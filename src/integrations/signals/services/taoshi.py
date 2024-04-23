@@ -111,6 +111,20 @@ def _import_taoshi_position(position: dict) -> None:
         )
 
         for order_info in position["orders"]:
+            market_price = None
+            existing_order = src_models.TaoshiPositionOrder.objects.filter(
+                order_uuid=order_info["order_uuid"]
+            ).first()
+            if existing_order:
+                market_price = existing_order.market_price
+
+            if not market_price:
+                market_price = _get_market_price(currency=base_currency.lower(), from_datetime=timezone.datetime.fromtimestamp(
+                    order_info["processed_ms"] / 1000
+                ), to_datetime=timezone.datetime.fromtimestamp(
+                    order_info["processed_ms"] / 1000
+                ))
+
             order_data = {
                 "order_uuid": order_info["order_uuid"],
                 "leverage": order_info["leverage"],
@@ -119,11 +133,7 @@ def _import_taoshi_position(position: dict) -> None:
                 ),
                 "order_type": order_info["order_type"],
                 "price": order_info["price"],
-                'market_price': _get_market_price(currency=base_currency.lower(), from_datetime=timezone.datetime.fromtimestamp(
-                    order_info["processed_ms"] / 1000
-                ), to_datetime=timezone.datetime.fromtimestamp(
-                    order_info["processed_ms"] / 1000
-                )),
+                'market_price': market_price,
                 "position": taoshi_position,
             }
 
